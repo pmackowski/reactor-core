@@ -1221,6 +1221,34 @@ public class StepVerifierTests {
 	}
 
 	@Test
+	public void testExpectRecordedMatches() {
+		List<Integer> expected = Arrays.asList(1,2);
+
+		StepVerifier.create(Flux.just(1,2))
+				.recordWith(ArrayList::new)
+				.thenConsumeWhile(i -> i < 2)
+				.expectRecordedMatches(expected::equals)
+				.thenCancel()
+				.verify();
+	}
+
+    @Test
+    public void testExpectRecordedMatchesWithoutComplete() {
+        List<Integer> expected = Arrays.asList(1,2);
+
+        TestPublisher<Integer> publisher = TestPublisher.createCold();
+        publisher.next(1);
+        publisher.next(2);
+
+        StepVerifier.create(publisher)
+                .recordWith(ArrayList::new)
+                .thenConsumeWhile(i -> i < 2)
+                .expectRecordedMatches(expected::equals)
+                .thenCancel()
+                .verify();
+    }
+
+	@Test
 	public void testWithDescription() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> StepVerifier.create(Flux.just("foo", "bar", "baz"), 3)

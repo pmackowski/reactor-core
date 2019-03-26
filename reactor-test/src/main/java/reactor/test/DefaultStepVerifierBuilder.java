@@ -1307,7 +1307,7 @@ final class DefaultStepVerifierBuilder<T>
 				this.completeLatch.countDown();
 				return true;
 			}
-			return true;
+			return false;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -1336,14 +1336,16 @@ final class DefaultStepVerifierBuilder<T>
 					}
 					//possibly re-evaluate the current onNext
 					event = this.script.peek();
-				}
+				} else if (event instanceof CollectEvent) {
+                    if (onCollect(actualSignal)) {
+                        return;
+                    }
+                    //possibly re-evaluate the current onNext
+                    event = this.script.peek();
+                }
+
 				if (event instanceof SignalCountEvent) {
 					if (onSignalCount(actualSignal, (SignalCountEvent<T>) event)) {
-						return;
-					}
-				}
-				else if (event instanceof CollectEvent) {
-					if (onCollect(actualSignal)) {
 						return;
 					}
 				}
